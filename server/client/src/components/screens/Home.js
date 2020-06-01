@@ -1,5 +1,6 @@
 import React, {useEffect, useState, useContext, Component} from 'react'
 import {UserContext} from  '../../App'
+import "../../App.css"
 import {useHistory} from 'react-router-dom'
 import M from 'materialize-css'
 
@@ -102,11 +103,10 @@ const Profile = () => {
                     })
                 }).then(res => res.json())
                 .then(result => {
-                    console.log(result)
                     if(result.error){
-                        console.log(result.error)
+                        M.toast({html: result.error, classes:"#c62828 red darken-3"})
                     }else{
-                        console.log(result.message)
+                        M.toast({html: result.message, classes:"#43a047 green darken-1"})
                         localStorage.clear()
                         dispatch({type:"CLEAR"})
                         history.push('/login')
@@ -135,11 +135,10 @@ const Profile = () => {
             })
         }).then(res => res.json())
         .then(result => {
-            console.log(result)
             if(result.error){
-                console.log(result.error)
+                M.toast({html: result.error, classes:"#c62828 red darken-3"})
             }else{
-                console.log(result.message)
+                M.toast({html: result.message, classes:"#43a047 green darken-1"})
                 localStorage.clear()
                 dispatch({type:"CLEAR"})
                 history.push('/login')

@@ -82,11 +82,11 @@ router.put('/api/updateuser/:id', requireLogin, (req, res)=>{
             photo
         }, {new: true})
         .then(user => {
-            return res.json({message:"successfully editted"})
+            res.json({message:"successfully editted"})
             res.send(user)
         }).catch(err => {
-            return res.status(422).json({error:"user not found with id "  + req.params.id})
-        });  
+            console.log(err)
+        })
     })
     .catch(err => {
         console.log(err)
