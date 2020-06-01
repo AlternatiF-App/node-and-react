@@ -14,7 +14,6 @@ const Home = () =>  {
     const toggleProfile = () => setSum(false) || setPro(true) || setPor(false)
     const togglePortofolio = () => setSum(false) || setPro(false) || setPor(true)
 
-    const [mypics, setPics] = useState([])
     const {state, dispatch} = useContext(UserContext)
 
     return(
@@ -77,10 +76,9 @@ const Profile = () => {
     const [image, setImage] = useState("")
     const {state, dispatch} = useContext(UserContext)
     const history = useHistory()
-
-    const updateUser = (_id) => {
-        if(image){
-            const data = new FormData()
+    
+    const updatePic = () => {
+        const data = new FormData()
             data.append("file", image)
             data.append("upload_preset", "insta-clone")
             data.append("cloud_name", "fanani-apps")
@@ -90,38 +88,29 @@ const Profile = () => {
             })
             .then(res => res.json())
             .then(data => {
-                fetch(`/api/updateuser/${state._id}`, {
+                fetch('/api/updatepic', {
                     method:"put",
                     headers:{
                         "Authorization":"Bearer "+localStorage.getItem("jwt"),
                         "Content-Type":"application/json"
                     },
                     body:JSON.stringify({
-                        name,
-                        password,
                         photo:data.url
                     })
                 }).then(res => res.json())
                 .then(result => {
-                    if(result.error){
-                        M.toast({html: result.error, classes:"#c62828 red darken-3"})
-                    }else{
-                        M.toast({html: result.message, classes:"#43a047 green darken-1"})
-                        localStorage.clear()
-                        dispatch({type:"CLEAR"})
-                        history.push('/login')
-                    }
-                }).catch(err => {
-                    console.log(err)
+                    console.log(result)
+                    localStorage.setItem("user", JSON.stringify({...state, photo:data.url}))
+                    dispatch({type:"UPDATEPIC", payload:result.photo})
+                    // window.location.reload()
                 })
             })
             .catch(err => {
                 console.log(err)
             })
-        }
     }
 
-    const upNoImage = (_id) => {
+    const updateName = (_id) => {
         fetch(`/api/updateuser/${state._id}`, {
             method:"put",
             headers:{
@@ -130,6 +119,32 @@ const Profile = () => {
             },
             body:JSON.stringify({
                 name,
+                password:state.password,
+                photo:state.photo
+            })
+        }).then(res => res.json())
+        .then(result => {
+            if(result.error){
+                M.toast({html: result.error, classes:"#c62828 red darken-3"})
+            }else{
+                M.toast({html: result.message, classes:"#43a047 green darken-1"})
+                localStorage.setItem("user", JSON.stringify({...state, name}))
+                dispatch({type:"UPDATENAME", payload:name})
+            }
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+
+    const updatePass = (_id) => {
+        fetch(`/api/updateuser/${state._id}`, {
+            method:"put",
+            headers:{
+                "Authorization":"Bearer "+localStorage.getItem("jwt"),
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                name:state.name,
                 password,
                 photo:state.photo
             })
@@ -149,25 +164,15 @@ const Profile = () => {
     }
 
     const postUpdate = () => {
-        if(image){
-            updateUser()
-        }else{
-            upNoImage()
+        if(name || !password || !image){
+            updateName()
+        }else if(!name || password || !image){
+            updatePass()
         }
     }
 
     return(
         <div className="profile-container">
-            <div className="comp-edit">
-                <h6 className="text-edit">Edit Password</h6>
-                <input
-                    type="password"
-                    className="input-edit"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
             <div className="comp-edit">
                 <h6 className="text-edit">Edit Name</h6>
                 <input
@@ -176,6 +181,17 @@ const Profile = () => {
                     placeholder="Password"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                />
+            </div>
+            
+            <div className="comp-edit">
+                <h6 className="text-edit">Edit Password</h6>
+                <input
+                    type="password"
+                    className="input-edit"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                 />
             </div>
 

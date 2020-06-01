@@ -56,8 +56,8 @@ router.post('/api/login', (req, res) => {
             if(doMatch){
                 // res.json({message:"Sign In Successfuly"})
                 const token = jwt.sign({_id:savedUser._id}, JWT_SECRET)
-                const {_id, name, email, phone, photo} = savedUser
-                res.json({token, user:{_id, name, email, phone, photo}})
+                const {_id, name, email, phone, photo, password} = savedUser
+                res.json({token, user:{_id, name, email, phone, photo, password}})
             }else{
                 return res.status(422).json({err:"Invalid password"})
             }
@@ -68,15 +68,19 @@ router.post('/api/login', (req, res) => {
     })
 })
 
-router.put('/api/updateuser/:id', requireLogin, (req, res)=>{
+router.put('/api/updateuser/:_id', requireLogin, (req, res)=>{
     const {name, password, photo} = req.body
-    if(!name || !password || !photo) {
-        return res.status(422).json({error:"please fill all the fields"})
+    if(!name) {
+        return res.status(422).json({error:"please fill name the fields"})
+    }else if(!password){
+        return res.status(422).json({error:"please fill password the fields"})
+    }else if(!photo){
+        return res.status(422).json({error:"please fill photo the fields"})
     }
 
     bcrypt.hash(password, 12)
     .then(hashedPassword => {
-        User.findByIdAndUpdate(req.params.id, {
+        User.findByIdAndUpdate(req.params._id, {
             name,
             password: hashedPassword,
             photo
@@ -89,6 +93,19 @@ router.put('/api/updateuser/:id', requireLogin, (req, res)=>{
         })
     })
     .catch(err => {
+        console.log(err)
+    })
+})
+
+router.put('/api/updatepic', requireLogin, (req, res) => {
+    const {photo} = req.body
+    User.findByIdAndUpdate(req.body._id, {
+        photo
+    }, {new: true})
+    .then(user => {
+        res.json({message:"successfully update photo"})
+        res.send(user)
+    }).catch(err => {
         console.log(err)
     })
 })
