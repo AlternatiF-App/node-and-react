@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
         required:true
+    },
+    photo:{
+        type:String,
+        default:"https://res.cloudinary.com/fanani-apps/image/upload/v1589383102/download_wwpzug.png"
     }
 })
 
