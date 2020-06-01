@@ -70,9 +70,7 @@ router.post('/api/login', (req, res) => {
 
 router.put('/api/updateuser/:id', requireLogin, (req, res)=>{
     if(!req.body) {
-        return res.status(400).send({
-            message: "Please fill all required field"
-        });
+        return res.status(422).json({error:"please fill all the fields"})
     }
 
     // Find user and update it with the request body
@@ -85,20 +83,13 @@ router.put('/api/updateuser/:id', requireLogin, (req, res)=>{
         }, {new: true})
         .then(user => {
             if(!user) {
-                return res.status(404).send({
-                    message: "user not found with id " + req.params.id
-                });
+                return res.status(422).json({error:"user not found with id "  + req.params.id})
+            }else{
+                res.json({message:"successfully editted"})
+                res.send(user)
             }
-            res.send(user);
         }).catch(err => {
-            if(err.kind === 'ObjectId') {
-                return res.status(404).send({
-                    message: "user not found with id " + req.params.id
-                });                
-            }
-            return res.status(500).send({
-                message: "Error updating user with id " + req.params.id
-            });
+            return res.status(422).json({error:"user not found with id "  + req.params.id})
         });  
     })
 })
