@@ -69,28 +69,27 @@ router.post('/api/login', (req, res) => {
 })
 
 router.put('/api/updateuser/:id', requireLogin, (req, res)=>{
-    if(!req.body) {
+    const {name, password, photo} = req.body
+    if(!name || !password || !photo) {
         return res.status(422).json({error:"please fill all the fields"})
     }
 
-    // Find user and update it with the request body
-    bcrypt.hash(req.body.password, 12)
+    bcrypt.hash(password, 12)
     .then(hashedPassword => {
         User.findByIdAndUpdate(req.params.id, {
-            name: req.body.name,
+            name,
             password: hashedPassword,
-            photo: req.body.photo
+            photo
         }, {new: true})
         .then(user => {
-            if(!user) {
-                return res.status(422).json({error:"user not found with id "  + req.params.id})
-            }else{
-                res.json({message:"successfully editted"})
-                res.send(user)
-            }
+            return res.json({message:"successfully editted"})
+            res.send(user)
         }).catch(err => {
             return res.status(422).json({error:"user not found with id "  + req.params.id})
         });  
+    })
+    .catch(err => {
+        console.log(err)
     })
 })
 

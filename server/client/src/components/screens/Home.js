@@ -15,8 +15,6 @@ const Home = () =>  {
 
     const [mypics, setPics] = useState([])
     const {state, dispatch} = useContext(UserContext)
-    const [image, setImage] = useState("")
-    const [url, setUrl] = useState(undefined)
 
     return(
         <div style={{
@@ -80,7 +78,6 @@ const Profile = () => {
     const history = useHistory()
 
     const updateUser = (_id) => {
-
         if(image){
             const data = new FormData()
             data.append("file", image)
@@ -124,6 +121,42 @@ const Profile = () => {
         }
     }
 
+    const upNoImage = (_id) => {
+        fetch(`/api/updateuser/${state._id}`, {
+            method:"put",
+            headers:{
+                "Authorization":"Bearer "+localStorage.getItem("jwt"),
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                name,
+                password,
+                photo:state.photo
+            })
+        }).then(res => res.json())
+        .then(result => {
+            console.log(result)
+            if(result.error){
+                console.log(result.error)
+            }else{
+                console.log(result.message)
+                localStorage.clear()
+                dispatch({type:"CLEAR"})
+                history.push('/login')
+            }
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+
+    const postUpdate = () => {
+        if(image){
+            updateUser()
+        }else{
+            upNoImage()
+        }
+    }
+
     return(
         <div className="profile-container">
             <div className="comp-edit">
@@ -162,7 +195,7 @@ const Profile = () => {
 
             <button 
                 className="btn-auth"
-                onClick={() =>updateUser()}
+                onClick={() =>postUpdate()}
                 >
                     Update
             </button>
