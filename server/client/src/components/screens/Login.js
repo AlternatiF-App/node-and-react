@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useState, useEffect} from 'react'
 import {Link, useHistory} from 'react-router-dom'
 import {UserContext} from '../../App'
 import M from 'materialize-css'
@@ -40,10 +40,16 @@ const Login = () => {
         })
     }
 
+    const onSubmit = e => {
+        e.preventDefault();
+        PostData()
+    }
+
     return(
         <div className="container">
             <p className="text-title">Login</p>
                 <label>Email</label>
+                <form onSubmit={onSubmit}>
                 <input 
                     type="text"
                     className="form_login" 
@@ -60,11 +66,12 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}/>
         
                 <button 
+                    type="submit"
                     className="btn-auth"
-                    onClick={() => PostData()}>
+                    >
                         Login
                 </button>
-        
+                </form>
                 <br/>
                 <br/>
                 <center>

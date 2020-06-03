@@ -54,10 +54,11 @@ router.post('/api/login', (req, res) => {
         bcrypt.compare(password, savedUser.password)
         .then(doMatch => {
             if(doMatch){
+                
                 // res.json({message:"Sign In Successfuly"})
                 const token = jwt.sign({_id:savedUser._id}, JWT_SECRET)
-                const {_id, name, email, phone, photo, password} = savedUser
-                res.json({token, user:{_id, name, email, phone, photo, password}})
+                const {_id, name, email, phone, photo} = savedUser
+                res.json({token, user:{_id, name, email, phone, photo}})
             }else{
                 return res.status(422).json({err:"Invalid password"})
             }
@@ -97,6 +98,26 @@ router.put('/api/updateuser/:_id', requireLogin, (req, res)=>{
     })
 })
 
+router.put('/api/updatenopass/:_id', requireLogin, (req, res)=>{
+    const {name, photo} = req.body
+    if(!name) {
+        return res.status(422).json({error:"please fill name the fields"})
+    }else if(!photo){
+        return res.status(422).json({error:"please fill photo the fields"})
+    }
+
+    User.findByIdAndUpdate(req.params._id, {
+        name,
+        photo
+    }, {new: true})
+    .then(user => {
+        res.json({message:"successfully editted"})
+        res.send(user)
+    }).catch(err => {
+        console.log(err)
+    })
+})
+
 router.put('/api/updatepic', requireLogin, (req, res) => {
     const {photo} = req.body
     User.findByIdAndUpdate(req.body._id, {
@@ -107,6 +128,23 @@ router.put('/api/updatepic', requireLogin, (req, res) => {
         res.send(user)
     }).catch(err => {
         console.log(err)
+    })
+})
+
+router.delete('/api/deleteuser/:_id',requireLogin,(req,res)=>{
+    User.findOne({_id:req.params._id})
+    .exec((err,user)=>{
+        if(err || !user){
+            return res.status(422).json({error:err})
+        }
+        if(user._id.toString() === req.user._id.toString()){
+            user.remove()
+            .then(result=>{
+                res.json(result)
+            }).catch(err=>{
+                console.log(err)
+            })
+        }
     })
 })
 

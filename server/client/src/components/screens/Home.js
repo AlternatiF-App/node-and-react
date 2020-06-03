@@ -3,9 +3,10 @@ import {UserContext} from  '../../App'
 import "../../App.css"
 import {useHistory} from 'react-router-dom'
 import M from 'materialize-css'
+import $ from 'jquery'
 
 const Home = () =>  {
-
+ 
     const [showSummary,  setSum] = useState(true)
     const [showProfile,  setPro] = useState(false)
     const [showPortofolio,  setPor] = useState(false)
@@ -15,6 +16,12 @@ const Home = () =>  {
     const togglePortofolio = () => setSum(false) || setPro(false) || setPor(true)
 
     const {state, dispatch} = useContext(UserContext)
+
+    useEffect(() => {
+        $(document).on('click', 'ul li', function(){
+            $(this).addClass('active').siblings().removeClass('active')
+        })
+    })
 
     return(
         <div style={{
@@ -46,7 +53,7 @@ const Home = () =>  {
             <div className="gallery">
                 <div className="container-menu">
                     <ul>
-                        <li><a onClick={toggleSummary}>Summary</a></li>
+                        <li className="active"><a onClick={toggleSummary}>Summary</a></li>
                         <li><a onClick={toggleProfile}>Profile</a></li>
                         <li><a onClick={togglePortofolio}>Portofolio</a></li>
                     </ul>
@@ -76,111 +83,244 @@ const Profile = () => {
     const [image, setImage] = useState("")
     const {state, dispatch} = useContext(UserContext)
     const history = useHistory()
-    
-    const updatePic = () => {
-        const data = new FormData()
-            data.append("file", image)
-            data.append("upload_preset", "insta-clone")
-            data.append("cloud_name", "fanani-apps")
-            fetch("https://api.cloudinary.com/v1_1/fanani-apps/image/upload", {
-                method:"post",
-                body:data
-            })
-            .then(res => res.json())
-            .then(data => {
-                fetch('/api/updatepic', {
+
+    const postUpdate = () => {
+        if(image){
+            if(name && !password){
+                const data = new FormData()
+                data.append("file", image)
+                data.append("upload_preset", "insta-clone")
+                data.append("cloud_name", "fanani-apps")
+                fetch("https://api.cloudinary.com/v1_1/fanani-apps/image/upload", {
+                    method:"post",
+                    body:data
+                })
+                .then(res => res.json())
+                .then(data => {
+                    fetch(`/api/updatenopass/${state._id}`, {
+                        method:"put",
+                        headers:{
+                            "Authorization":"Bearer "+localStorage.getItem("jwt"),
+                            "Content-Type":"application/json"
+                        },
+                        body:JSON.stringify({
+                            name,
+                            photo:data.url
+                        })
+                    }).then(res => res.json())
+                    .then(result => {
+                        if(result.error){
+                            M.toast({html: result.error, classes:"#c62828 red darken-3"})
+                        }else{
+                            M.toast({html: result.message, classes:"#43a047 green darken-1"})
+                            localStorage.setItem("user", JSON.stringify({...state, name, photo:data.url}))
+                            window.location.reload()
+                        }
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            }else if(!name && password){
+                const data = new FormData()
+                data.append("file", image)
+                data.append("upload_preset", "insta-clone")
+                data.append("cloud_name", "fanani-apps")
+                fetch("https://api.cloudinary.com/v1_1/fanani-apps/image/upload", {
+                    method:"post",
+                    body:data
+                })
+                .then(res => res.json())
+                .then(data => {
+                    fetch(`/api/updateuser/${state._id}`, {
+                        method:"put",
+                        headers:{
+                            "Authorization":"Bearer "+localStorage.getItem("jwt"),
+                            "Content-Type":"application/json"
+                        },
+                        body:JSON.stringify({
+                            name:state.name,
+                            password,
+                            photo:data.url
+                        })
+                    }).then(res => res.json())
+                    .then(result => {
+                        if(result.error){
+                            M.toast({html: result.error, classes:"#c62828 red darken-3"})
+                        }else{
+                            M.toast({html: result.message, classes:"#43a047 green darken-1"})
+                            localStorage.clear()
+                            dispatch({type:"CLEAR"})
+                            history.push('/login')
+                        }
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            }else if(name && password){
+                const data = new FormData()
+                data.append("file", image)
+                data.append("upload_preset", "insta-clone")
+                data.append("cloud_name", "fanani-apps")
+                fetch("https://api.cloudinary.com/v1_1/fanani-apps/image/upload", {
+                    method:"post",
+                    body:data
+                })
+                .then(res => res.json())
+                .then(data => {
+                    fetch(`/api/updateuser/${state._id}`, {
+                        method:"put",
+                        headers:{
+                            "Authorization":"Bearer "+localStorage.getItem("jwt"),
+                            "Content-Type":"application/json"
+                        },
+                        body:JSON.stringify({
+                            name,
+                            password,
+                            photo:data.url
+                        })
+                    }).then(res => res.json())
+                    .then(result => {
+                        if(result.error){
+                            M.toast({html: result.error, classes:"#c62828 red darken-3"})
+                        }else{
+                            M.toast({html: result.message, classes:"#43a047 green darken-1"})
+                            localStorage.clear()
+                            dispatch({type:"CLEAR"})
+                            history.push('/login')
+                        }
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            }else{
+                const data = new FormData()
+                data.append("file", image)
+                data.append("upload_preset", "insta-clone")
+                data.append("cloud_name", "fanani-apps")
+                fetch("https://api.cloudinary.com/v1_1/fanani-apps/image/upload", {
+                    method:"post",
+                    body:data
+                })
+                .then(res => res.json())
+                .then(data => {
+                    fetch(`/api/updatenopass/${state._id}`, {
+                        method:"put",
+                        headers:{
+                            "Authorization":"Bearer "+localStorage.getItem("jwt"),
+                            "Content-Type":"application/json"
+                        },
+                        body:JSON.stringify({
+                            name:state.name,
+                            photo:data.url
+                        })
+                    }).then(res => res.json())
+                    .then(result => {
+                        if(result.error){
+                            M.toast({html: result.error, classes:"#c62828 red darken-3"})
+                        }else{
+                            M.toast({html: result.message, classes:"#43a047 green darken-1"})
+                            localStorage.setItem("user", JSON.stringify({...state, photo:data.url}))
+                            window.location.reload()
+                        }
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            }
+        }else{
+            if(name && !password){
+                fetch(`/api/updatenopass/${state._id}`, {
                     method:"put",
                     headers:{
                         "Authorization":"Bearer "+localStorage.getItem("jwt"),
                         "Content-Type":"application/json"
                     },
                     body:JSON.stringify({
-                        photo:data.url
+                        name,
+                        photo:state.photo
                     })
                 }).then(res => res.json())
                 .then(result => {
-                    console.log(result)
-                    localStorage.setItem("user", JSON.stringify({...state, photo:data.url}))
-                    dispatch({type:"UPDATEPIC", payload:result.photo})
-                    // window.location.reload()
+                    if(result.error){
+                        M.toast({html: result.error, classes:"#c62828 red darken-3"})
+                    }else{
+                        M.toast({html: result.message, classes:"#43a047 green darken-1"})
+                        localStorage.setItem("user", JSON.stringify({...state, name}))
+                        // dispatch({type:"UPDATENAME", payload:name})
+                        window.location.reload()
+                    }
+                }).catch(err => {
+                    console.log(err)
                 })
-            })
-            .catch(err => {
-                console.log(err)
-            })
-    }
-
-    const updateName = (_id) => {
-        fetch(`/api/updateuser/${state._id}`, {
-            method:"put",
-            headers:{
-                "Authorization":"Bearer "+localStorage.getItem("jwt"),
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                name,
-                password:state.password,
-                photo:state.photo
-            })
-        }).then(res => res.json())
-        .then(result => {
-            if(result.error){
-                M.toast({html: result.error, classes:"#c62828 red darken-3"})
+            }else if(!name && password){
+                fetch(`/api/updateuser/${state._id}`, {
+                    method:"put",
+                    headers:{
+                        "Authorization":"Bearer "+localStorage.getItem("jwt"),
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify({
+                        name:state.name,
+                        password,
+                        photo:state.photo
+                    })
+                }).then(res => res.json())
+                .then(result => {
+                    if(result.error){
+                        M.toast({html: result.error, classes:"#c62828 red darken-3"})
+                    }else{
+                        M.toast({html: result.message, classes:"#43a047 green darken-1"})
+                        localStorage.clear()
+                        dispatch({type:"CLEAR"})
+                        history.push('/login')
+                    }
+                }).catch(err => {
+                    console.log(err)
+                })
             }else{
-                M.toast({html: result.message, classes:"#43a047 green darken-1"})
-                localStorage.setItem("user", JSON.stringify({...state, name}))
-                dispatch({type:"UPDATENAME", payload:name})
+                fetch(`/api/updateuser/${state._id}`, {
+                    method:"put",
+                    headers:{
+                        "Authorization":"Bearer "+localStorage.getItem("jwt"),
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify({
+                        name,
+                        password,
+                        photo:state.photo
+                    })
+                }).then(res => res.json())
+                .then(result => {
+                    if(result.error){
+                        M.toast({html: result.error, classes:"#c62828 red darken-3"})
+                    }else{
+                        M.toast({html: result.message, classes:"#43a047 green darken-1"})
+                        localStorage.clear()
+                        dispatch({type:"CLEAR"})
+                        history.push('/login')
+                    }
+                }).catch(err => {
+                    console.log(err)
+                })
             }
-        }).catch(err => {
-            console.log(err)
-        })
-    }
-
-    const updatePass = (_id) => {
-        fetch(`/api/updateuser/${state._id}`, {
-            method:"put",
-            headers:{
-                "Authorization":"Bearer "+localStorage.getItem("jwt"),
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                name:state.name,
-                password,
-                photo:state.photo
-            })
-        }).then(res => res.json())
-        .then(result => {
-            if(result.error){
-                M.toast({html: result.error, classes:"#c62828 red darken-3"})
-            }else{
-                M.toast({html: result.message, classes:"#43a047 green darken-1"})
-                localStorage.clear()
-                dispatch({type:"CLEAR"})
-                history.push('/login')
-            }
-        }).catch(err => {
-            console.log(err)
-        })
-    }
-
-    const postUpdate = () => {
-        if(name || !password || !image){
-            updateName()
-        }else if(!name || password || !image){
-            updatePass()
         }
     }
 
     return(
         <div className="profile-container">
+
             <div className="comp-edit">
                 <h6 className="text-edit">Edit Name</h6>
                 <input
                     type="text"
                     className="input-edit"
-                    placeholder="Password"
+                    placeholder="Name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(event) => setName(event.target.value)}
                 />
             </div>
             
